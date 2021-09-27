@@ -51,6 +51,9 @@ boolean designEnd = false;
 PFont font;
 
 boolean canReload = true;
+boolean canExport = true;
+
+int exportIndex;
 
 //----------------------------------------------------------------------------------
 //                                    SETUP
@@ -62,6 +65,16 @@ void setup() {
   //Gets all the names of the images from the data folder and puts them in an array
   java.io.File dataFolder = new java.io.File(dataPath("images"));
   fileNames = dataFolder.list();
+  
+  //Checks the id of the last exported image from the export folder
+  java.io.File exportFolder = new java.io.File(dataPath("export"));
+  String[] exportNames = exportFolder.list();
+  
+  if(exportNames != null){
+    exportIndex = int(exportNames[exportNames.length - 1].substring(8, 12)) + 1;
+  } else {
+    exportIndex = 0;
+  }
 
   //Draws the different textures
   wall();
@@ -215,7 +228,7 @@ void draw() {
   }
 
   //If the image is done processing, export it.
-  if (spiralEnd && designEnd) {
+  if (spiralEnd && designEnd && canExport) {
     export();
   }
 }
@@ -354,14 +367,18 @@ void wall() {
 
 //Exports the image
 void export() {
-  saveFrame("export/screen-####.png");
-  noLoop();
+  saveFrame("data/export/screen-" + nf(exportIndex, 4) + ".png");
+  exportIndex++;
+  canExport = false;
+  naming = true;
 }
 
 void resetSpiral() {
   canReload = true;
   spiralIndex = 0;
   spiralEnd = false;
+  designIndex = 0;
+  designEnd = false;
 }
 
 //Checks for keypresses
@@ -370,6 +387,7 @@ void keyPressed() {
   if (keyCode == 10) {
     letters = title.toCharArray();
     naming = false;
+    canExport = true;
   }
 
   //Backspace
